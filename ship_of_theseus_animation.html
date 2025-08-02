@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship of Theseus - Interactive Animation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #87CEEB;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            margin-bottom: 30px;
+        }
+
+        .scene {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ship-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .ship {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .ship-hull {
+            width: 200px;
+            height: 60px;
+            background: #8B4513;
+            border-radius: 0 0 50px 50px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .ship-deck {
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            right: 10px;
+            height: 20px;
+            background: #A0522D;
+            display: flex;
+            gap: 2px;
+            padding: 2px;
+        }
+
+        .plank {
+            flex: 1;
+            height: 100%;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .plank.old {
+            background: #654321;
+        }
+
+        .plank.new {
+            background: #D2B48C;
+            animation: replaceAnimation 0.5s ease;
+        }
+
+        @keyframes replaceAnimation {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .ship-name {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .counter {
+            font-size: 24px;
+            color: #2C3E50;
+            margin: 20px 0;
+        }
+
+        .counter span {
+            color: #F39C12;
+            font-weight: bold;
+        }
+
+        .two-ships {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .ship-small {
+            text-align: center;
+        }
+
+        .ship-small .ship-hull {
+            width: 150px;
+            height: 45px;
+        }
+
+        .ship-small .ship-deck {
+            top: -15px;
+            height: 15px;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .question {
+            font-size: 24px;
+            color: #e74c3c;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+
+        .explanation {
+            font-size: 18px;
+            color: #34495e;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .human-analogy {
+            margin: 30px 0;
+        }
+
+        .human {
+            width: 100px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .human-head {
+            width: 50px;
+            height: 50px;
+            background: #2C3E50;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+
+        .human-body {
+            width: 60px;
+            height: 80px;
+            background: #2C3E50;
+            margin: 0 auto;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cells {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #F39C12;
+            border-radius: 50%;
+            animation: cellFlow 3s infinite linear;
+        }
+
+        @keyframes cellFlow {
+            0% { top: -10px; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .final-question {
+            font-size: 28px;
+            color: #2C3E50;
+            margin: 40px 0;
+            line-height: 1.4;
+        }
+
+        #autoPlayBtn {
+            background: #27ae60;
+        }
+
+        #autoPlayBtn:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>The Ship of Theseus Paradox</h1>
+
+        <!-- Scene 1: Introduction -->
+        <div class="scene active" id="scene1">
+            <div class="ship-container">
+                <div class="ship">
+                    <div class="ship-hull">
+                        <div class="ship-deck">
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                            <div class="plank old"></div>
+                        </div>
+                        <div class="ship-name">THESEUS</div>
+                    </div>
+                </div>
+            </div>
+            <p class="explanation">This is the Ship of Theseus, a legendary vessel from Greek mythology.</p>
+            <button onclick="nextScene()">Begin the Journey →</button>
+        </div>
+
+        <!-- Scene 2: Replacement -->
+        <div class="scene" id="scene2">
+            <div class="ship-container">
+                <div class="ship" id="replacementShip">
+                    <div class="ship-hull">
+                        <div class="ship-deck" id="shipDeck">
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                            <div class="plank old" onclick="replacePlank(this)"></div>
+                        </div>
+                        <div class="ship-name">THESEUS</div>
+                    </div>
+                </div>
+            </div>
+            <div class="counter">Original parts remaining: <span id="counter">100%</span></div>
+            <p class="explanation">Click on the planks to replace them. What happens when all parts are replaced?</p>
+            <button onclick="replaceAllPlanks()">Replace All Planks</button>
+            <button onclick="nextScene()" id="nextBtn2" disabled>Continue →</button>
+        </div>
+
+        <!-- Scene 3: Two Ships -->
+        <div class="scene" id="scene3">
+            <div class="two-ships">
+                <div class="ship-small">
+                    <h3>Ship A: Continuous History</h3>
+                    <div class="ship">
+                        <div class="ship-hull">
+                            <div class="ship-deck">
+                                <div class="plank new"></div>
+                                <div class="plank new"></div>
+                                <div class="plank new"></div>
+                                <div class="plank new"></div>
+                                <div class="plank new"></div>
+                                <div class="plank new"></div>
+                            </div>
+                            <div class="ship-name">THESEUS</div>
+                        </div>
+                    </div>
+                    <p>All new parts</p>
+                </div>
+                <div class="ship-small">
+                    <h3>Ship B: Original Parts</h3>
+                    <div class="ship">
+                        <div class="ship-hull">
+                            <div class="ship-deck">
+                                <div class="plank old"></div>
+                                <div class="plank old"></div>
+                                <div class="plank old"></div>
+                                <div class="plank old"></div>
+                                <div class="plank old"></div>
+                                <div class="plank old"></div>
+                            </div>
+                            <div class="ship-name">THESEUS?</div>
+                        </div>
+                    </div>
+                    <p>Rebuilt from discarded parts</p>
+                </div>
+            </div>
+            <p class="question">Which one is the real Ship of Theseus?</p>
+            <button onclick="nextScene()">Think about it... →</button>
+        </div>
+
+        <!-- Scene 4: Human Analogy -->
+        <div class="scene" id="scene4">
+            <div class="human-analogy">
+                <div class="human">
+                    <div class="human-head"></div>
+                    <div class="human-body" id="humanBody"></div>
+                </div>
+            </div>
+            <p class="explanation">Your body replaces its cells over time. Nearly every cell in your body is replaced every 7-10 years.</p>
+            <p class="question">Are you still the same person?</p>
+            <button onclick="nextScene()">Final Thought →</button>
+        </div>
+
+        <!-- Scene 5: Conclusion -->
+        <div class="scene" id="scene5">
+            <div class="final-question">
+                What makes something the same?<br>
+                Its physical parts, or its continuity through time?
+            </div>
+            <p class="explanation">
+                The Ship of Theseus paradox challenges our understanding of identity. 
+                There's no single correct answer - it depends on how we define "sameness."
+            </p>
+            <button onclick="restart()">Start Over</button>
+            <button id="autoPlayBtn" onclick="autoPlay()">Auto Play</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+        let replacedPlanks = 0;
+        const totalPlanks = 8;
+
+        function nextScene() {
+            document.getElementById(`scene${currentScene}`).classList.remove('active');
+            currentScene++;
+            if (currentScene > 5) currentScene = 1;
+            document.getElementById(`scene${currentScene}`).classList.add('active');
+            
+            if (currentScene === 4) {
+                animateHumanCells();
+            }
+        }
+
+        function replacePlank(plank) {
+            if (plank.classList.contains('old')) {
+                plank.classList.remove('old');
+                plank.classList.add('new');
+                replacedPlanks++;
+                updateCounter();
+            }
+        }
+
+        function updateCounter() {
+            const percentage = Math.round((totalPlanks - replacedPlanks) / totalPlanks * 100);
+            document.getElementById('counter').textContent = percentage + '%';
+            
+            if (replacedPlanks === totalPlanks) {
+                document.getElementById('nextBtn2').disabled = false;
+                setTimeout(() => {
+                    alert("Is this still the Ship of Theseus?");
+                }, 500);
+            }
+        }
+
+        function replaceAllPlanks() {
+            const planks = document.querySelectorAll('#shipDeck .plank');
+            let delay = 0;
+            planks.forEach(plank => {
+                setTimeout(() => {
+                    replacePlank(plank);
+                }, delay);
+                delay += 200;
+            });
+        }
+
+        function animateHumanCells() {
+            const body = document.getElementById('humanBody');
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const cell = document.createElement('div');
+                    cell.className = 'cells';
+                    cell.style.left = Math.random() * 50 + 5 + 'px';
+                    cell.style.animationDelay = Math.random() * 3 + 's';
+                    body.appendChild(cell);
+                }, i * 300);
+            }
+        }
+
+        function restart() {
+            currentScene = 1;
+            replacedPlanks = 0;
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            document.getElementById('scene1').classList.add('active');
+            
+            // Reset planks
+            document.querySelectorAll('#shipDeck .plank').forEach(plank => {
+                plank.classList.remove('new');
+                plank.classList.add('old');
+            });
+            
+            // Reset counter
+            updateCounter();
+            document.getElementById('nextBtn2').disabled = true;
+            
+            // Clear human cells
+            document.getElementById('humanBody').innerHTML = '';
+        }
+
+        function autoPlay() {
+            restart();
+            const scenes = [
+                () => nextScene(),
+                () => replaceAllPlanks(),
+                () => setTimeout(() => nextScene(), 2000),
+                () => setTimeout(() => nextScene(), 3000),
+                () => setTimeout(() => nextScene(), 3000)
+            ];
+            
+            let delay = 0;
+            scenes.forEach((action, index) => {
+                setTimeout(action, delay);
+                delay += (index === 1) ? 3000 : 4000;
+            });
+        }
+    </script>
+</body>
+</html>
