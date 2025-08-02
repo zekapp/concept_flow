@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chinese Room Argument - Interactive Animation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            margin-bottom: 30px;
+        }
+
+        .scene {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .room-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            background: #ecf0f1;
+            border: 3px solid #34495e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .person-in-room {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 100px;
+        }
+
+        .person-head {
+            width: 40px;
+            height: 40px;
+            background: #e74c3c;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+        }
+
+        .person-body {
+            width: 50px;
+            height: 50px;
+            background: #e74c3c;
+            margin: 0 auto;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .slot {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            background: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .input-slot {
+            top: 50px;
+            left: -50px;
+        }
+
+        .output-slot {
+            top: 50px;
+            right: -50px;
+        }
+
+        .chinese-character {
+            font-size: 24px;
+            padding: 10px;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .chinese-character:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .rulebook {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 150px;
+            height: 100px;
+            background: #f39c12;
+            border: 2px solid #d68910;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rulebook:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .conversation-area {
+            margin: 20px 0;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            min-height: 150px;
+            overflow-x: auto;
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 20px;
+            animation: messageAppear 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @keyframes messageAppear {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .chinese-message {
+            background: #3498db;
+            color: white;
+            text-align: left;
+            margin-right: auto;
+            max-width: 80%;
+            margin-left: 0;
+        }
+
+        .english-message {
+            background: #2ecc71;
+            color: white;
+            text-align: right;
+            margin-left: auto;
+            max-width: 70%;
+        }
+
+        .response-message {
+            background: #e74c3c;
+            color: white;
+            text-align: right;
+            margin-left: auto;
+            max-width: 80%;
+            margin-right: 0;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .explanation {
+            font-size: 18px;
+            color: #34495e;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .question {
+            font-size: 24px;
+            color: #e74c3c;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+
+        .rule-display {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 3px solid #f39c12;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .rule-display.active {
+            display: block;
+        }
+
+        .processing-animation {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .processing-animation.active {
+            display: block;
+        }
+
+        .gear {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #3498db;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .computer-comparison {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .comparison-item {
+            text-align: center;
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .comparison-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: #3498db;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+        }
+
+        #autoPlayBtn {
+            background: #27ae60;
+        }
+
+        #autoPlayBtn:hover {
+            background: #229954;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #34495e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .final-thought {
+            font-size: 28px;
+            color: #2C3E50;
+            margin: 40px 0;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .room-container {
+                height: 300px;
+            }
+            
+            .computer-comparison {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .comparison-item {
+                margin: 0;
+            }
+            
+            .final-thought {
+                font-size: 22px;
+            }
+            
+            .chinese-message,
+            .response-message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Gallery</a>
+    <div class="container">
+        <h1>The Chinese Room Argument</h1>
+
+        <!-- Scene 1: Introduction -->
+        <div class="scene active" id="scene1">
+            <div class="room-container">
+                <div class="person-in-room">
+                    <div class="person-head"></div>
+                    <div class="person-body"></div>
+                </div>
+                <div class="rulebook">Rule Book<br>📚</div>
+                <div class="slot input-slot">INPUT</div>
+                <div class="slot output-slot">OUTPUT</div>
+            </div>
+            <p class="explanation">
+                Imagine a person locked in a room with a book of rules for manipulating Chinese characters.
+                They don't understand Chinese at all.
+            </p>
+            <button onclick="nextScene()">See How It Works →</button>
+        </div>
+
+        <!-- Scene 2: The Process -->
+        <div class="scene" id="scene2">
+            <div class="room-container" id="roomDemo">
+                <div class="person-in-room">
+                    <div class="person-head"></div>
+                    <div class="person-body"></div>
+                </div>
+                <div class="rulebook" onclick="showRules()">Rule Book<br>📚</div>
+                <div class="slot input-slot">INPUT</div>
+                <div class="slot output-slot">OUTPUT</div>
+                <div class="rule-display" id="ruleDisplay">
+                    <h3>Rules for Symbol Manipulation</h3>
+                    <p>If you see: 你好<br>Then write: 我很好</p>
+                    <p>If you see: 今天天气<br>Then write: 晴天</p>
+                    <button onclick="hideRules()">Close</button>
+                </div>
+                <div class="processing-animation" id="processingAnim">
+                    <div class="gear"></div>
+                </div>
+            </div>
+            <div class="conversation-area" id="conversationArea">
+                <p style="color: #7f8c8d;">Chinese speakers outside send questions...</p>
+            </div>
+            <button onclick="startConversation()">Start Chinese Conversation</button>
+            <button onclick="nextScene()" id="nextBtn2" disabled>Continue →</button>
+        </div>
+
+        <!-- Scene 3: The Argument -->
+        <div class="scene" id="scene3">
+            <div class="computer-comparison">
+                <div class="comparison-item">
+                    <div class="comparison-icon">🧑</div>
+                    <h3>Person in Room</h3>
+                    <p>Follows rules perfectly</p>
+                    <p>Gives correct answers</p>
+                    <p style="color: #e74c3c; font-weight: bold;">But doesn't understand Chinese!</p>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-icon">💻</div>
+                    <h3>Computer</h3>
+                    <p>Follows programs perfectly</p>
+                    <p>Gives correct answers</p>
+                    <p style="color: #e74c3c; font-weight: bold;">But does it understand?</p>
+                </div>
+            </div>
+            <p class="question">
+                If the person doesn't understand Chinese despite perfect responses,
+                does a computer truly understand what it processes?
+            </p>
+            <button onclick="nextScene()">Think Deeper →</button>
+        </div>
+
+        <!-- Scene 4: Implications -->
+        <div class="scene" id="scene4">
+            <div class="room-container">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                    <div style="font-size: 72px; margin-bottom: 20px;">🤔</div>
+                    <h2>Syntax vs. Semantics</h2>
+                </div>
+            </div>
+            <p class="explanation">
+                <strong>Syntax:</strong> The rules and structure (what the person in the room follows)<br>
+                <strong>Semantics:</strong> The meaning and understanding (what the person lacks)<br><br>
+                Searle argues that computers, like the person in the room, only manipulate symbols according to rules.
+                They have syntax but no semantics - no real understanding.
+            </p>
+            <button onclick="nextScene()">Final Thoughts →</button>
+        </div>
+
+        <!-- Scene 5: Conclusion -->
+        <div class="scene" id="scene5">
+            <div class="final-thought">
+                Can a system that perfectly simulates understanding<br>
+                actually understand?<br>
+                Or is it just following rules?
+            </div>
+            <p class="explanation">
+                The Chinese Room argument challenges the idea that artificial intelligence can have genuine understanding or consciousness.
+                It suggests that passing the Turing Test isn't enough to prove real intelligence.
+                This remains one of the most debated topics in philosophy of mind and AI.
+            </p>
+            <button onclick="restart()">Start Over</button>
+            <button id="autoPlayBtn" onclick="autoPlay()">Auto Play</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+        let conversationStep = 0;
+
+        function nextScene() {
+            document.getElementById(`scene${currentScene}`).classList.remove('active');
+            currentScene++;
+            if (currentScene > 5) currentScene = 1;
+            document.getElementById(`scene${currentScene}`).classList.add('active');
+        }
+
+        function showRules() {
+            document.getElementById('ruleDisplay').classList.add('active');
+        }
+
+        function hideRules() {
+            document.getElementById('ruleDisplay').classList.remove('active');
+        }
+
+        function startConversation() {
+            const conversationArea = document.getElementById('conversationArea');
+            const processingAnim = document.getElementById('processingAnim');
+            
+            const conversations = [
+                { input: '你好吗？', output: '我很好，谢谢！', english: 'Q: How are you? A: I am fine, thank you!' },
+                { input: '今天天气怎么样？', output: '今天是晴天。', english: 'Q: How is the weather? A: It is sunny.' },
+                { input: '你喜欢什么？', output: '我喜欢学习。', english: 'Q: What do you like? A: I like learning.' }
+            ];
+
+            if (conversationStep < conversations.length) {
+                // Clear previous conversation
+                if (conversationStep === 0) {
+                    conversationArea.innerHTML = '';
+                }
+
+                const conv = conversations[conversationStep];
+                
+                // Show input
+                const inputMsg = document.createElement('div');
+                inputMsg.className = 'message chinese-message';
+                inputMsg.innerHTML = conv.input + '<br><small style="opacity: 0.8;">' + conv.english.split('A:')[0] + '</small>';
+                conversationArea.appendChild(inputMsg);
+
+                // Show processing
+                processingAnim.classList.add('active');
+
+                setTimeout(() => {
+                    processingAnim.classList.remove('active');
+                    
+                    // Show output
+                    const outputMsg = document.createElement('div');
+                    outputMsg.className = 'message response-message';
+                    outputMsg.innerHTML = conv.output + '<br><small style="opacity: 0.8;">' + conv.english.split('A:')[1] + '</small>';
+                    conversationArea.appendChild(outputMsg);
+
+                    conversationStep++;
+                    
+                    if (conversationStep >= conversations.length) {
+                        document.getElementById('nextBtn2').disabled = false;
+                        setTimeout(() => {
+                            alert("Perfect Chinese responses! But the person inside still doesn't understand a word of Chinese.");
+                        }, 1000);
+                    }
+                }, 2000);
+            }
+        }
+
+        function restart() {
+            currentScene = 1;
+            conversationStep = 0;
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            document.getElementById('scene1').classList.add('active');
+            document.getElementById('conversationArea').innerHTML = '<p style="color: #7f8c8d;">Chinese speakers outside send questions...</p>';
+            document.getElementById('nextBtn2').disabled = true;
+        }
+
+        function autoPlay() {
+            restart();
+            const actions = [
+                () => nextScene(),
+                () => {
+                    const interval = setInterval(() => {
+                        if (conversationStep < 3) {
+                            startConversation();
+                        } else {
+                            clearInterval(interval);
+                            setTimeout(() => nextScene(), 2000);
+                        }
+                    }, 3000);
+                },
+                () => setTimeout(() => nextScene(), 4000),
+                () => setTimeout(() => nextScene(), 4000)
+            ];
+            
+            let delay = 0;
+            actions.forEach((action, index) => {
+                setTimeout(action, delay);
+                delay += (index === 1) ? 10000 : 3000;
+            });
+        }
+    </script>
+</body>
+</html>
