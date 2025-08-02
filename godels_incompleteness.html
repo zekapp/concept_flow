@@ -68,6 +68,15 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        .scene.fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
 
         .math-system {
             background: #ecf0f1;
@@ -499,28 +508,41 @@
         const totalScenes = 6;
 
         function nextScene() {
-            document.getElementById(`scene${currentScene}`).classList.remove('active');
-            currentScene++;
-            if (currentScene > totalScenes) currentScene = 1;
+            const currentSceneEl = document.getElementById(`scene${currentScene}`);
+            currentSceneEl.classList.add('fade-out');
+            
             setTimeout(() => {
-                document.getElementById(`scene${currentScene}`).classList.add('active');
-            }, 100);
+                currentSceneEl.classList.remove('active', 'fade-out');
+                currentScene++;
+                if (currentScene > totalScenes) currentScene = 1;
+                
+                const nextSceneEl = document.getElementById(`scene${currentScene}`);
+                nextSceneEl.classList.add('active');
+            }, 300);
         }
 
         function showBonus() {
-            document.getElementById(`scene${currentScene}`).classList.remove('active');
-            currentScene = 6;
+            const currentSceneEl = document.getElementById(`scene${currentScene}`);
+            currentSceneEl.classList.add('fade-out');
+            
             setTimeout(() => {
-                document.getElementById(`scene${currentScene}`).classList.add('active');
-            }, 100);
+                currentSceneEl.classList.remove('active', 'fade-out');
+                currentScene = 6;
+                const bonusSceneEl = document.getElementById(`scene${currentScene}`);
+                bonusSceneEl.classList.add('active');
+            }, 300);
         }
 
         function restart() {
-            document.getElementById(`scene${currentScene}`).classList.remove('active');
-            currentScene = 1;
+            const currentSceneEl = document.getElementById(`scene${currentScene}`);
+            currentSceneEl.classList.add('fade-out');
+            
             setTimeout(() => {
-                document.getElementById(`scene${currentScene}`).classList.add('active');
-            }, 100);
+                currentSceneEl.classList.remove('active', 'fade-out');
+                currentScene = 1;
+                const firstSceneEl = document.getElementById(`scene${currentScene}`);
+                firstSceneEl.classList.add('active');
+            }, 300);
         }
 
         // Add keyboard navigation
@@ -528,9 +550,15 @@
             if (e.key === 'ArrowRight' && currentScene < totalScenes - 1) {
                 nextScene();
             } else if (e.key === 'ArrowLeft' && currentScene > 1) {
-                document.getElementById(`scene${currentScene}`).classList.remove('active');
-                currentScene--;
-                document.getElementById(`scene${currentScene}`).classList.add('active');
+                const currentSceneEl = document.getElementById(`scene${currentScene}`);
+                currentSceneEl.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    currentSceneEl.classList.remove('active', 'fade-out');
+                    currentScene--;
+                    const prevSceneEl = document.getElementById(`scene${currentScene}`);
+                    prevSceneEl.classList.add('active');
+                }, 300);
             }
         });
     </script>
