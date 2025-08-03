@@ -301,6 +301,36 @@
             color: #7f8c8d;
         }
 
+        .video-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .godel-video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .godel-video:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .video-caption {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #6c757d;
+            font-style: italic;
+        }
+
         @media (max-width: 768px) {
             .formal-system {
                 grid-template-columns: 1fr;
@@ -317,8 +347,32 @@
         <a href="index.html" class="back-button">← Back to Gallery</a>
         <h1>Gödel's Incompleteness Theorems</h1>
 
+        <!-- Scene 0: Video Overview -->
+        <div class="scene active" id="scene0">
+            <div class="explanation">
+                <p style="text-align: center; font-size: 1.2em; margin-bottom: 30px;">
+                    Let's start with a quick visual explanation of Gödel's revolutionary discovery:
+                </p>
+            </div>
+            <div class="video-container">
+                <video class="godel-video" controls autoplay muted id="godelVideo">
+                    <source src="Gödel_s_Theorems_Video_Ready.mp4" type="video/mp4">
+                    <p>Your browser doesn't support video playback. Please use a modern browser to view this content.</p>
+                </video>
+                <div class="video-caption">
+                    An 8-second overview of Gödel's Incompleteness Theorems
+                </div>
+            </div>
+            <p class="explanation" style="text-align: center;">
+                Now let's dive deeper into the details and see exactly how Gödel proved this remarkable result...
+            </p>
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="nextScene()">Explore the Details →</button>
+            </div>
+        </div>
+
         <!-- Scene 1: Introduction -->
-        <div class="scene active" id="scene1">
+        <div class="scene" id="scene1">
             <div class="explanation">
                 In 1931, Kurt Gödel shook the foundations of mathematics by proving that 
                 any consistent mathematical system capable of basic arithmetic contains 
@@ -504,8 +558,8 @@
     </div>
 
     <script>
-        let currentScene = 1;
-        const totalScenes = 6;
+        let currentScene = 0;
+        const totalScenes = 7;
 
         function nextScene() {
             const currentSceneEl = document.getElementById(`scene${currentScene}`);
@@ -514,10 +568,19 @@
             setTimeout(() => {
                 currentSceneEl.classList.remove('active', 'fade-out');
                 currentScene++;
-                if (currentScene > totalScenes) currentScene = 1;
+                if (currentScene > totalScenes - 1) currentScene = 0;
                 
                 const nextSceneEl = document.getElementById(`scene${currentScene}`);
                 nextSceneEl.classList.add('active');
+                
+                // Control video playback
+                const video = document.getElementById('godelVideo');
+                if (currentScene === 0 && video) {
+                    video.currentTime = 0;
+                    video.play();
+                } else if (video) {
+                    video.pause();
+                }
             }, 300);
         }
 
@@ -530,6 +593,10 @@
                 currentScene = 6;
                 const bonusSceneEl = document.getElementById(`scene${currentScene}`);
                 bonusSceneEl.classList.add('active');
+                
+                // Pause video when going to bonus
+                const video = document.getElementById('godelVideo');
+                if (video) video.pause();
             }, 300);
         }
 
@@ -539,17 +606,24 @@
             
             setTimeout(() => {
                 currentSceneEl.classList.remove('active', 'fade-out');
-                currentScene = 1;
+                currentScene = 0;
                 const firstSceneEl = document.getElementById(`scene${currentScene}`);
                 firstSceneEl.classList.add('active');
+                
+                // Reset and play video
+                const video = document.getElementById('godelVideo');
+                if (video) {
+                    video.currentTime = 0;
+                    video.play();
+                }
             }, 300);
         }
 
         // Add keyboard navigation
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' && currentScene < totalScenes - 1) {
+            if (e.key === 'ArrowRight' && currentScene < totalScenes - 2) {
                 nextScene();
-            } else if (e.key === 'ArrowLeft' && currentScene > 1) {
+            } else if (e.key === 'ArrowLeft' && currentScene > 0) {
                 const currentSceneEl = document.getElementById(`scene${currentScene}`);
                 currentSceneEl.classList.add('fade-out');
                 
@@ -558,7 +632,32 @@
                     currentScene--;
                     const prevSceneEl = document.getElementById(`scene${currentScene}`);
                     prevSceneEl.classList.add('active');
+                    
+                    // Control video playback for previous scene
+                    const video = document.getElementById('godelVideo');
+                    if (currentScene === 0 && video) {
+                        video.currentTime = 0;
+                        video.play();
+                    } else if (video) {
+                        video.pause();
+                    }
                 }, 300);
+            }
+        });
+
+        // Add video event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('godelVideo');
+            if (video) {
+                video.addEventListener('loadeddata', function() {
+                    console.log('Gödel video loaded successfully');
+                });
+                video.addEventListener('error', function() {
+                    console.error('Error loading Gödel video');
+                });
+                video.addEventListener('ended', function() {
+                    console.log('Gödel video finished playing');
+                });
             }
         });
     </script>
