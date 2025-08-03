@@ -336,6 +336,36 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
+        .video-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .chinese-room-video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chinese-room-video:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .video-caption {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #6c757d;
+            font-style: italic;
+        }
+
         .final-thought {
             font-size: 28px;
             color: #2C3E50;
@@ -378,8 +408,32 @@
     <div class="container">
         <h1>The Chinese Room Argument</h1>
 
+        <!-- Scene 0: Video Overview -->
+        <div class="scene active" id="scene0">
+            <div class="explanation">
+                <p style="text-align: center; font-size: 1.2em; margin-bottom: 30px;">
+                    Let's start with a quick visual explanation of Searle's famous thought experiment:
+                </p>
+            </div>
+            <div class="video-container">
+                <video class="chinese-room-video" controls autoplay muted id="chineseRoomVideo">
+                    <source src="Chinese_Room_Argument_Video_Ready.mp4" type="video/mp4">
+                    <p>Your browser doesn't support video playback. Please use a modern browser to view this content.</p>
+                </video>
+                <div class="video-caption">
+                    An 8-second overview of The Chinese Room Argument
+                </div>
+            </div>
+            <p class="explanation" style="text-align: center;">
+                Now let's dive deeper and experience the thought experiment step by step...
+            </p>
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="nextScene()">Enter the Room →</button>
+            </div>
+        </div>
+
         <!-- Scene 1: Introduction -->
-        <div class="scene active" id="scene1">
+        <div class="scene" id="scene1">
             <div class="room-container">
                 <div class="person-in-room">
                     <div class="person-head"></div>
@@ -483,14 +537,23 @@
     </div>
 
     <script>
-        let currentScene = 1;
+        let currentScene = 0;
         let conversationStep = 0;
 
         function nextScene() {
             document.getElementById(`scene${currentScene}`).classList.remove('active');
             currentScene++;
-            if (currentScene > 5) currentScene = 1;
+            if (currentScene > 5) currentScene = 0;
             document.getElementById(`scene${currentScene}`).classList.add('active');
+            
+            // Control video playback
+            const video = document.getElementById('chineseRoomVideo');
+            if (currentScene === 0 && video) {
+                video.currentTime = 0;
+                video.play();
+            } else if (video) {
+                video.pause();
+            }
         }
 
         function showRules() {
@@ -550,20 +613,28 @@
         }
 
         function restart() {
-            currentScene = 1;
+            currentScene = 0;
             conversationStep = 0;
             document.querySelectorAll('.scene').forEach(scene => {
                 scene.classList.remove('active');
             });
-            document.getElementById('scene1').classList.add('active');
+            document.getElementById('scene0').classList.add('active');
             document.getElementById('conversationArea').innerHTML = '<p style="color: #7f8c8d;">Chinese speakers outside send questions...</p>';
             document.getElementById('nextBtn2').disabled = true;
+            
+            // Reset and play video
+            const video = document.getElementById('chineseRoomVideo');
+            if (video) {
+                video.currentTime = 0;
+                video.play();
+            }
         }
 
         function autoPlay() {
             restart();
             const actions = [
-                () => nextScene(),
+                () => nextScene(), // Scene 1
+                () => nextScene(), // Scene 2
                 () => {
                     const interval = setInterval(() => {
                         if (conversationStep < 3) {
@@ -574,16 +645,32 @@
                         }
                     }, 3000);
                 },
-                () => setTimeout(() => nextScene(), 4000),
-                () => setTimeout(() => nextScene(), 4000)
+                () => setTimeout(() => nextScene(), 4000), // Scene 4
+                () => setTimeout(() => nextScene(), 4000)  // Scene 5
             ];
             
-            let delay = 0;
+            let delay = 4000; // Wait for video to finish
             actions.forEach((action, index) => {
                 setTimeout(action, delay);
-                delay += (index === 1) ? 10000 : 3000;
+                delay += (index === 2) ? 10000 : 3000;
             });
         }
+
+        // Add video event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('chineseRoomVideo');
+            if (video) {
+                video.addEventListener('loadeddata', function() {
+                    console.log('Chinese Room video loaded successfully');
+                });
+                video.addEventListener('error', function() {
+                    console.error('Error loading Chinese Room video');
+                });
+                video.addEventListener('ended', function() {
+                    console.log('Chinese Room video finished playing');
+                });
+            }
+        });
     </script>
 </body>
 </html>
