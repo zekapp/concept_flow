@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plato's Cave - Interactive Animation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            margin-bottom: 30px;
+        }
+
+        .scene {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cave-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+            margin: 20px auto;
+            background: linear-gradient(to bottom, #34495e 0%, #2c3e50 50%, #1a1a1a 100%);
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+            border: 3px solid #2c3e50;
+        }
+
+        .cave-wall {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to top, #1a1a1a 0%, #2c3e50 100%);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .prisoners {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .prisoner {
+            width: 30px;
+            height: 50px;
+            background: #e74c3c;
+            border-radius: 15px 15px 5px 5px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .prisoner::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 15px;
+            background: #e74c3c;
+            border-radius: 50%;
+        }
+
+        .chain {
+            position: absolute;
+            top: 10px;
+            left: -5px;
+            right: -5px;
+            height: 3px;
+            background: #7f8c8d;
+            border-radius: 2px;
+        }
+
+        .fire {
+            position: absolute;
+            bottom: 150px;
+            right: 100px;
+            width: 60px;
+            height: 80px;
+            display: none;
+        }
+
+        .fire.active {
+            display: block;
+        }
+
+        .flame {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to top, #e74c3c 0%, #f39c12 50%, #f1c40f 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1) rotate(-2deg); }
+            100% { transform: translateX(-50%) scale(1.1) rotate(2deg); }
+        }
+
+        .shadow-wall {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 300px;
+            height: 150px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shadow-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .shadow-video.active {
+            opacity: 1;
+        }
+
+        .shadow-placeholder {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-style: italic;
+            border-radius: 8px;
+        }
+
+        .object {
+            position: absolute;
+            bottom: 120px;
+            right: 50px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .object.active {
+            opacity: 1;
+            animation: objectMove 4s ease-in-out infinite;
+        }
+
+        @keyframes objectMove {
+            0%, 100% { right: 150px; }
+            50% { right: 50px; }
+        }
+
+        .rabbit {
+            background: #8e44ad;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        }
+
+        .rabbit::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            width: 8px;
+            height: 20px;
+            background: #8e44ad;
+            border-radius: 50%;
+            transform: rotate(-20deg);
+        }
+
+        .rabbit::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            width: 8px;
+            height: 20px;
+            background: #8e44ad;
+            border-radius: 50%;
+            transform: rotate(20deg);
+        }
+
+        .freed-prisoner {
+            position: absolute;
+            bottom: 180px;
+            left: 200px;
+            width: 30px;
+            height: 50px;
+            background: #27ae60;
+            border-radius: 15px 15px 5px 5px;
+            opacity: 0;
+            transition: all 1s ease;
+            z-index: 10;
+        }
+
+        .freed-prisoner.active {
+            opacity: 1;
+        }
+
+        .freed-prisoner::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 15px;
+            background: #27ae60;
+            border-radius: 50%;
+        }
+
+        .sun {
+            position: absolute;
+            top: 20px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            background: #f1c40f;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 1s ease;
+            box-shadow: 0 0 30px #f39c12;
+        }
+
+        .sun.active {
+            opacity: 1;
+            animation: sunGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sunGlow {
+            0% { box-shadow: 0 0 30px #f39c12; }
+            100% { box-shadow: 0 0 50px #f39c12; }
+        }
+
+        .sunrays {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            opacity: 0;
+        }
+
+        .sunrays.active {
+            opacity: 1;
+            animation: rotate 8s linear infinite;
+        }
+
+        .sunray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3px;
+            height: 60px;
+            background: linear-gradient(to top, transparent 0%, #f1c40f 100%);
+            transform-origin: bottom center;
+        }
+
+        .sunray:nth-child(1) { transform: translate(-50%, -100%) rotate(0deg); }
+        .sunray:nth-child(2) { transform: translate(-50%, -100%) rotate(45deg); }
+        .sunray:nth-child(3) { transform: translate(-50%, -100%) rotate(90deg); }
+        .sunray:nth-child(4) { transform: translate(-50%, -100%) rotate(135deg); }
+        .sunray:nth-child(5) { transform: translate(-50%, -100%) rotate(180deg); }
+        .sunray:nth-child(6) { transform: translate(-50%, -100%) rotate(225deg); }
+        .sunray:nth-child(7) { transform: translate(-50%, -100%) rotate(270deg); }
+        .sunray:nth-child(8) { transform: translate(-50%, -100%) rotate(315deg); }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .trees {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            opacity: 0;
+            transition: all 1s ease;
+        }
+
+        .trees.active {
+            opacity: 1;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 80px;
+            background: #27ae60;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tree::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            width: 40px;
+            height: 40px;
+            background: #2ecc71;
+            border-radius: 50%;
+        }
+
+        .tree:nth-child(1) { left: 50px; }
+        .tree:nth-child(2) { left: 150px; height: 60px; }
+        .tree:nth-child(3) { left: 250px; height: 90px; }
+        .tree:nth-child(4) { left: 350px; height: 70px; }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .explanation {
+            font-size: 18px;
+            color: #34495e;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .question {
+            font-size: 24px;
+            color: #e74c3c;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+
+        .enlightenment-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 20px auto;
+            background: linear-gradient(to bottom, #3498db 0%, #87ceeb 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #2980b9;
+        }
+
+        .comparison-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .comparison-item {
+            text-align: center;
+            flex: 1;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 15px;
+            margin: 0 10px;
+        }
+
+        .comparison-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: #34495e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+        }
+
+        .final-thought {
+            font-size: 28px;
+            color: #2C3E50;
+            margin: 40px 0;
+            line-height: 1.4;
+        }
+
+        #autoPlayBtn {
+            background: #27ae60;
+        }
+
+        #autoPlayBtn:hover {
+            background: #229954;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #34495e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .cave-container {
+                height: 300px;
+            }
+            
+            .comparison-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .comparison-item {
+                margin: 0;
+            }
+            
+            .final-thought {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Gallery</a>
+    <div class="container">
+        <h1>Plato's Cave</h1>
+
+        <!-- Scene 1: Introduction -->
+        <div class="scene active" id="scene1">
+            <div class="cave-container">
+                <div class="cave-wall"></div>
+                <div class="prisoners">
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                </div>
+                <div class="shadow-wall">
+                    <div class="shadow-placeholder">Shadows await...</div>
+                </div>
+            </div>
+            <p class="explanation">
+                Imagine prisoners chained in a cave, facing a wall. They have been there since birth and cannot turn their heads.
+                All they have ever seen are shadows on the wall in front of them.
+            </p>
+            <button onclick="nextScene()">Start the Shadow Show →</button>
+        </div>
+
+        <!-- Scene 2: Shadows on the Wall -->
+        <div class="scene" id="scene2">
+            <div class="cave-container">
+                <div class="cave-wall"></div>
+                <div class="prisoners">
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                </div>
+                <div class="shadow-wall">
+                    <video class="shadow-video active" autoplay muted loop id="shadowVideo">
+                        <source src="Plato_s_Cave_Video_Ready.mp4" type="video/mp4">
+                        <div class="shadow-placeholder">Video not supported</div>
+                    </video>
+                </div>
+                <div class="fire active">
+                    <div class="flame"></div>
+                </div>
+                <div class="object rabbit active"></div>
+            </div>
+            <p class="explanation">
+                Behind the prisoners, a fire casts shadows of objects on the wall. 
+                The prisoners think these shadows ARE reality - they don't know about the actual objects or the fire.
+            </p>
+            <button onclick="nextScene()">Free a Prisoner →</button>
+        </div>
+
+        <!-- Scene 3: The Liberation -->
+        <div class="scene" id="scene3">
+            <div class="cave-container">
+                <div class="cave-wall"></div>
+                <div class="prisoners">
+                    <div class="prisoner" style="opacity: 0.5;">
+                        <div class="chain"></div>
+                    </div>
+                    <div class="prisoner" style="opacity: 0.5;">
+                        <div class="chain"></div>
+                    </div>
+                </div>
+                <div class="freed-prisoner active" id="freedPrisoner"></div>
+                <div class="shadow-wall">
+                    <video class="shadow-video active" autoplay muted loop>
+                        <source src="Plato_s_Cave_Video_Ready.mp4" type="video/mp4">
+                        <div class="shadow-placeholder">Video not supported</div>
+                    </video>
+                </div>
+                <div class="fire active">
+                    <div class="flame"></div>
+                </div>
+                <div class="object rabbit active"></div>
+            </div>
+            <p class="explanation">
+                One prisoner is freed and turns around. For the first time, they see the fire and the objects casting shadows. 
+                This is painful and confusing - their eyes hurt from the light!
+            </p>
+            <button onclick="moveToSun()">Lead Them to Sunlight →</button>
+        </div>
+
+        <!-- Scene 4: The Sun -->
+        <div class="scene" id="scene4">
+            <div class="enlightenment-container">
+                <div class="sun active">
+                    <div class="sunrays active">
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                        <div class="sunray"></div>
+                    </div>
+                </div>
+                <div class="trees active">
+                    <div class="tree"></div>
+                    <div class="tree"></div>
+                    <div class="tree"></div>
+                    <div class="tree"></div>
+                </div>
+                <div class="freed-prisoner active" style="bottom: 20px; left: 50%; transform: translateX(-50%);"></div>
+            </div>
+            <p class="explanation">
+                The freed prisoner is brought outside the cave into sunlight. After their eyes adjust, 
+                they see the real world - trees, the sun, and true reality for the first time!
+            </p>
+            <button onclick="nextScene()">Return to the Cave →</button>
+        </div>
+
+        <!-- Scene 5: The Return -->
+        <div class="scene" id="scene5">
+            <div class="cave-container">
+                <div class="cave-wall"></div>
+                <div class="prisoners">
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                    <div class="prisoner">
+                        <div class="chain"></div>
+                    </div>
+                </div>
+                <div class="freed-prisoner active" style="bottom: 50px; left: 30%; animation: none;"></div>
+                <div class="shadow-wall">
+                    <video class="shadow-video active" autoplay muted loop>
+                        <source src="Plato_s_Cave_Video_Ready.mp4" type="video/mp4">
+                        <div class="shadow-placeholder">Video not supported</div>
+                    </video>
+                </div>
+                <div class="fire active">
+                    <div class="flame"></div>
+                </div>
+            </div>
+            <p class="explanation">
+                The enlightened prisoner returns to tell the others about the real world. 
+                But the chained prisoners think he's crazy! They prefer their familiar shadows 
+                and might even attack him for disturbing their reality.
+            </p>
+            <button onclick="nextScene()">Understand the Meaning →</button>
+        </div>
+
+        <!-- Scene 6: The Allegory's Meaning -->
+        <div class="scene" id="scene6">
+            <div class="comparison-container">
+                <div class="comparison-item">
+                    <div class="comparison-icon">🏛️</div>
+                    <h3>The Cave</h3>
+                    <p>Our world of everyday experience</p>
+                    <p style="color: #7f8c8d;">Physical reality, sensory perception</p>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-icon">☀️</div>
+                    <h3>The Sun</h3>
+                    <p>The world of true knowledge</p>
+                    <p style="color: #7f8c8d;">Abstract concepts, pure forms, truth</p>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-icon">🧠</div>
+                    <h3>The Journey</h3>
+                    <p>Education and philosophy</p>
+                    <p style="color: #7f8c8d;">The path from ignorance to wisdom</p>
+                </div>
+            </div>
+            <p class="question">
+                What if our reality is just shadows on a wall? 
+                How do we know what we perceive is actually real?
+            </p>
+            <button onclick="nextScene()">Final Reflection →</button>
+        </div>
+
+        <!-- Scene 7: Conclusion -->
+        <div class="scene" id="scene7">
+            <div class="final-thought">
+                We may all be prisoners in our own caves,<br>
+                mistaking shadows for reality.<br>
+                What shadows are you watching?
+            </div>
+            <p class="explanation">
+                Plato's Cave illustrates the philosopher's journey from ignorance to knowledge, 
+                and the difficulty of convincing others to question their perceived reality. 
+                It challenges us to examine our assumptions about truth and reality.
+            </p>
+            <button onclick="restart()">Start Over</button>
+            <button id="autoPlayBtn" onclick="autoPlay()">Auto Play</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+
+        function nextScene() {
+            document.getElementById(`scene${currentScene}`).classList.remove('active');
+            currentScene++;
+            if (currentScene > 7) currentScene = 1;
+            document.getElementById(`scene${currentScene}`).classList.add('active');
+            
+            // Control video playback
+            const videos = document.querySelectorAll('.shadow-video');
+            videos.forEach(video => {
+                if (currentScene === 2 || currentScene === 3 || currentScene === 5) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            });
+        }
+
+        function moveToSun() {
+            const freedPrisoner = document.getElementById('freedPrisoner');
+            freedPrisoner.style.transition = 'all 2s ease';
+            freedPrisoner.style.bottom = '200px';
+            freedPrisoner.style.left = '400px';
+            freedPrisoner.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                nextScene();
+            }, 2500);
+        }
+
+        function restart() {
+            currentScene = 1;
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            document.getElementById('scene1').classList.add('active');
+            
+            // Reset freed prisoner position
+            const freedPrisoner = document.getElementById('freedPrisoner');
+            if (freedPrisoner) {
+                freedPrisoner.style.transition = 'all 1s ease';
+                freedPrisoner.style.bottom = '180px';
+                freedPrisoner.style.left = '200px';
+                freedPrisoner.style.opacity = '0';
+            }
+            
+            // Reset video playback
+            const videos = document.querySelectorAll('.shadow-video');
+            videos.forEach(video => {
+                video.pause();
+                video.currentTime = 0;
+            });
+        }
+
+        function autoPlay() {
+            restart();
+            const actions = [
+                () => nextScene(), // Scene 2
+                () => nextScene(), // Scene 3
+                () => moveToSun(), // Scene 4 (with animation)
+                () => setTimeout(() => nextScene(), 3000), // Scene 5
+                () => setTimeout(() => nextScene(), 4000), // Scene 6
+                () => setTimeout(() => nextScene(), 4000)  // Scene 7
+            ];
+            
+            let delay = 3000;
+            actions.forEach((action, index) => {
+                setTimeout(action, delay);
+                delay += (index === 2) ? 6000 : 4000; // Longer delay for the sun scene
+            });
+        }
+
+        // Add click interactions for prisoners
+        document.addEventListener('DOMContentLoaded', function() {
+            const prisoners = document.querySelectorAll('.prisoner');
+            prisoners.forEach(prisoner => {
+                prisoner.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+
+            // Add hover effects for interactive elements
+            const objects = document.querySelectorAll('.object');
+            objects.forEach(obj => {
+                obj.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.2)';
+                });
+                obj.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+            
+            // Initialize video controls
+            const videos = document.querySelectorAll('.shadow-video');
+            videos.forEach(video => {
+                video.pause(); // Start paused
+                video.addEventListener('loadeddata', function() {
+                    console.log('Shadow video loaded successfully');
+                });
+                video.addEventListener('error', function() {
+                    console.error('Error loading shadow video');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
