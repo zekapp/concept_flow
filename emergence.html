@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergence - Interactive Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateX(-3px);
+        }
+
+        h1 {
+            color: #2C3E50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .scene {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .scene.fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .explanation {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #34495e;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .simulation-container {
+            background: #ecf0f1;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .boid-canvas {
+            background: #34495e;
+            border-radius: 10px;
+        }
+
+        .rules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .rule-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .rule-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .rule-card h4 {
+            color: #2C3E50;
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .emergent-behavior {
+            background: #e8f4f8;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .emergent-behavior h3 {
+            color: #2C3E50;
+            margin-bottom: 15px;
+        }
+
+        .emergent-behavior p {
+            font-size: 1.2em;
+            color: #34495e;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Gallery</a>
+        <h1>Emergence: How Simple Rules Secretly Build a Complex World</h1>
+
+        <!-- Scene 1: Introduction -->
+        <div class="scene active" id="scene1">
+            <div class="explanation">
+                <p>Have you ever wondered how a flock of birds can fly in perfect unison, or how an ant colony can build a complex nest? There's no leader giving orders, yet they create intricate patterns and structures.</p>
+                <p>This is the magic of <strong>emergence</strong>: complex, organized behavior arising from simple, local interactions.</p>
+            </div>
+            <div class="simulation-container">
+                <canvas id="boids-canvas" class="boid-canvas" width="400" height="300"></canvas>
+            </div>
+            <p class="explanation">
+                Let's explore this with a classic example: "Boids," an artificial life program that simulates the flocking behavior of birds.
+            </p>
+            <div style="text-align: center;">
+                <button onclick="nextScene()">Discover the Simple Rules →</button>
+            </div>
+        </div>
+
+        <!-- Scene 2: The Three Simple Rules -->
+        <div class="scene" id="scene2">
+            <h2 style="text-align: center; color: #2C3E50; margin-bottom: 30px;">The Three Simple Rules of Flocking</h2>
+            <div class="rules">
+                <div class="rule-card">
+                    <h4>1. Separation</h4>
+                    <p>Steer to avoid crowding local flockmates.</p>
+                </div>
+                <div class="rule-card">
+                    <h4>2. Alignment</h4>
+                    <p>Steer towards the average heading of local flockmates.</p>
+                </div>
+                <div class="rule-card">
+                    <h4>3. Cohesion</h4>
+                    <p>Steer to move toward the average position of local flockmates.</p>
+                </div>
+            </div>
+            <p class="explanation">
+                Each "boid" (or simulated bird) only knows about its immediate neighbors. It doesn't know about the overall state of the flock. Yet, from these three simple rules, a complex and lifelike flocking behavior emerges.
+            </p>
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="nextScene()">See the Emergent Behavior →</button>
+            </div>
+        </div>
+
+        <!-- Scene 3: The Emergent Behavior -->
+        <div class="scene" id="scene3">
+            <h2 style="text-align: center; color: #2C3E50; margin-bottom: 30px;">The Whole is Greater Than the Sum of its Parts</h2>
+            <div class="emergent-behavior">
+                <h3>From Simple Rules to Complex Systems</h3>
+                <p>
+                    The flocking behavior is an <span class="highlight">emergent property</span>. It's a characteristic of the group, not of any individual boid. You can't predict the flock's behavior by studying a single boid in isolation.
+                </p>
+            </div>
+            <p class="explanation">
+                This principle is everywhere in nature and society:
+            </p>
+            <ul>
+                <li><strong>Ant Colonies:</strong> No single ant knows the blueprint of the nest, but together they build it.</li>
+                <li><strong>Consciousness:</strong> Your thoughts and feelings emerge from the interactions of billions of neurons. No single neuron is "conscious."</li>
+                <li><strong>Cities:</strong> Neighborhoods and traffic patterns emerge from the individual decisions of millions of people.</li>
+            </ul>
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="restart()">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+
+        function nextScene() {
+            document.getElementById(`scene${currentScene}`).classList.remove('active');
+            currentScene++;
+            if (currentScene > 3) currentScene = 1;
+            document.getElementById(`scene${currentScene}`).classList.add('active');
+        }
+
+        function restart() {
+            currentScene = 1;
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            document.getElementById('scene1').classList.add('active');
+        }
+
+        // Boids simulation
+        const canvas = document.getElementById('boids-canvas');
+        const ctx = canvas.getContext('2d');
+        const boids = [];
+
+        class Boid {
+            constructor() {
+                this.position = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
+                this.velocity = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
+                this.maxSpeed = 2;
+                this.perceptionRadius = 50;
+            }
+
+            update(flock) {
+                this.flock(flock);
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                this.edges();
+            }
+
+            edges() {
+                if (this.position.x > canvas.width) this.position.x = 0;
+                else if (this.position.x < 0) this.position.x = canvas.width;
+                if (this.position.y > canvas.height) this.position.y = 0;
+                else if (this.position.y < 0) this.position.y = canvas.height;
+            }
+
+            flock(boids) {
+                let alignment = { x: 0, y: 0 };
+                let cohesion = { x: 0, y: 0 };
+                let separation = { x: 0, y: 0 };
+                let total = 0;
+
+                for (let other of boids) {
+                    let d = Math.sqrt(
+                        (this.position.x - other.position.x) ** 2 +
+                        (this.position.y - other.position.y) ** 2
+                    );
+
+                    if (other !== this && d < this.perceptionRadius) {
+                        alignment.x += other.velocity.x;
+                        alignment.y += other.velocity.y;
+                        cohesion.x += other.position.x;
+                        cohesion.y += other.position.y;
+                        separation.x += this.position.x - other.position.x;
+                        separation.y += this.position.y - other.position.y;
+                        total++;
+                    }
+                }
+
+                if (total > 0) {
+                    alignment.x /= total;
+                    alignment.y /= total;
+                    cohesion.x /= total;
+                    cohesion.y /= total;
+                    separation.x /= total;
+                    separation.y /= total;
+
+                    cohesion.x -= this.position.x;
+                    cohesion.y -= this.position.y;
+
+                    this.velocity.x += alignment.x * 0.05 + cohesion.x * 0.005 + separation.x * 0.05;
+                    this.velocity.y += alignment.y * 0.05 + cohesion.y * 0.005 + separation.y * 0.05;
+                }
+
+                const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
+                if (speed > this.maxSpeed) {
+                    this.velocity.x = (this.velocity.x / speed) * this.maxSpeed;
+                    this.velocity.y = (this.velocity.y / speed) * this.maxSpeed;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.position.x, this.position.y);
+                ctx.rotate(Math.atan2(this.velocity.y, this.velocity.x));
+                ctx.beginPath();
+                ctx.moveTo(10, 0);
+                ctx.lineTo(-5, 5);
+                ctx.lineTo(-5, -5);
+                ctx.closePath();
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 100; i++) {
+            boids.push(new Boid());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let boid of boids) {
+                boid.update(boids);
+                boid.draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
