@@ -159,10 +159,21 @@
             border-radius: 8px;
             opacity: 0;
             transition: opacity 0.5s ease;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .shadow-video.active {
             opacity: 1;
+        }
+
+        /* Prevent fullscreen video issues */
+        .shadow-video::-webkit-media-controls-fullscreen-button {
+            display: none !important;
+        }
+
+        .shadow-video::-webkit-media-controls {
+            display: none !important;
         }
 
         .shadow-placeholder {
@@ -546,7 +557,7 @@
                     </div>
                 </div>
                 <div class="shadow-wall">
-                    <video class="shadow-video active" autoplay muted loop id="shadowVideo">
+                    <video class="shadow-video active" muted loop playsinline id="shadowVideo">
                         <source src="Plato_s_Cave_Video_Ready.mp4" type="video/mp4">
                         <div class="shadow-placeholder">Video not supported</div>
                     </video>
@@ -577,7 +588,7 @@
                 </div>
                 <div class="freed-prisoner active" id="freedPrisoner"></div>
                 <div class="shadow-wall">
-                    <video class="shadow-video active" autoplay muted loop>
+                    <video class="shadow-video active" muted loop playsinline>
                         <source src="Plato_s_Cave_Video_Ready.mp4" type="video/mp4">
                         <div class="shadow-placeholder">Video not supported</div>
                     </video>
@@ -638,7 +649,7 @@
                 </div>
                 <div class="freed-prisoner active" style="bottom: 50px; left: 30%; animation: none;"></div>
                 <div class="shadow-wall">
-                    <video class="shadow-video active" autoplay muted loop>
+                    <video class="shadow-video active" muted loop playsinline>
                         <source src="Plato_s_Cave_Video_Ready.mp4" type="video/mp4">
                         <div class="shadow-placeholder">Video not supported</div>
                     </video>
@@ -714,7 +725,7 @@
             const videos = document.querySelectorAll('.shadow-video');
             videos.forEach(video => {
                 if (currentScene === 2 || currentScene === 3 || currentScene === 5) {
-                    video.play();
+                    video.play().catch(e => console.log('Video play failed:', e));
                 } else {
                     video.pause();
                 }
@@ -802,11 +813,15 @@
             const videos = document.querySelectorAll('.shadow-video');
             videos.forEach(video => {
                 video.pause(); // Start paused
+                video.load(); // Ensure video is loaded
                 video.addEventListener('loadeddata', function() {
                     console.log('Shadow video loaded successfully');
                 });
                 video.addEventListener('error', function() {
                     console.error('Error loading shadow video');
+                });
+                video.addEventListener('loadstart', function() {
+                    console.log('Shadow video started loading');
                 });
             });
         });
