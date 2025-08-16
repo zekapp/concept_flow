@@ -379,9 +379,6 @@
             cursor: pointer;
             margin: 10px;
             transition: all 0.3s ease;
-            min-height: 48px;
-            min-width: 120px;
-            touch-action: manipulation;
         }
 
         button:hover {
@@ -488,63 +485,10 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
-        .navigation-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
-            border-radius: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .nav-button {
-            background: #34495e;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-height: 44px;
-            min-width: 80px;
-            touch-action: manipulation;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .nav-button:hover {
-            background: #2c3e50;
-            transform: translateY(-2px);
-        }
-
-        .nav-button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-            opacity: 0.5;
-        }
-
-        .nav-button.primary {
-            background: #3498db;
-        }
-
-        .nav-button.primary:hover {
-            background: #2980b9;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
                 margin: 10px;
-                padding-bottom: 120px;
             }
             
             .cave-container {
@@ -562,80 +506,6 @@
             
             .final-thought {
                 font-size: 22px;
-            }
-            
-            .navigation-controls {
-                bottom: 10px;
-                padding: 8px 15px;
-                gap: 10px;
-            }
-            
-            .nav-button {
-                padding: 10px 15px;
-                font-size: 14px;
-                min-width: 70px;
-                min-height: 40px;
-            }
-            
-            .back-button {
-                top: 10px;
-                left: 10px;
-                padding: 8px 15px;
-                font-size: 14px;
-            }
-            
-            button {
-                padding: 12px 25px;
-                font-size: 16px;
-                margin: 8px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-                margin: 5px;
-                padding-bottom: 100px;
-            }
-            
-            h1 {
-                font-size: 1.8em;
-                margin-bottom: 20px;
-            }
-            
-            .cave-container {
-                height: 250px;
-            }
-            
-            .enlightenment-container {
-                height: 250px;
-            }
-            
-            .explanation {
-                font-size: 16px;
-            }
-            
-            .question {
-                font-size: 20px;
-                margin: 20px 0;
-            }
-            
-            .final-thought {
-                font-size: 20px;
-                margin: 30px 0;
-            }
-            
-            .navigation-controls {
-                bottom: 5px;
-                padding: 6px 12px;
-                gap: 8px;
-            }
-            
-            .nav-button {
-                padding: 8px 12px;
-                font-size: 13px;
-                min-width: 60px;
-                min-height: 36px;
             }
         }
     </style>
@@ -842,16 +712,6 @@
         </div>
     </div>
 
-    <!-- Navigation Controls -->
-    <div class="navigation-controls">
-        <button class="nav-button" id="prevBtn" onclick="previousScene()">
-            ← Previous
-        </button>
-        <button class="nav-button primary" id="nextBtn" onclick="nextScene()">
-            Next →
-        </button>
-    </div>
-
     <script>
         let currentScene = 1;
 
@@ -870,44 +730,6 @@
                     video.pause();
                 }
             });
-            
-            updateNavigationButtons();
-        }
-
-        function previousScene() {
-            document.getElementById(`scene${currentScene}`).classList.remove('active');
-            currentScene--;
-            if (currentScene < 1) currentScene = 7;
-            document.getElementById(`scene${currentScene}`).classList.add('active');
-            
-            // Control video playback
-            const videos = document.querySelectorAll('.shadow-video');
-            videos.forEach(video => {
-                if (currentScene === 2 || currentScene === 3 || currentScene === 5) {
-                    video.play().catch(e => console.log('Video play failed:', e));
-                } else {
-                    video.pause();
-                }
-            });
-            
-            updateNavigationButtons();
-        }
-
-        function updateNavigationButtons() {
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            // Update button text based on current scene
-            if (currentScene === 1) {
-                nextBtn.textContent = 'Start Shadow Show →';
-                prevBtn.textContent = '← To Final Thoughts';
-            } else if (currentScene === 7) {
-                nextBtn.textContent = 'Start Over →';
-                prevBtn.textContent = '← Previous';
-            } else {
-                nextBtn.textContent = 'Next →';
-                prevBtn.textContent = '← Previous';
-            }
         }
 
         function moveToSun() {
@@ -944,8 +766,6 @@
                 video.pause();
                 video.currentTime = 0;
             });
-            
-            updateNavigationButtons();
         }
 
         function autoPlay() {
@@ -1004,37 +824,6 @@
                     console.log('Shadow video started loading');
                 });
             });
-            
-            // Initialize navigation buttons
-            updateNavigationButtons();
-            
-            // Add touch swipe support
-            let touchStartX = 0;
-            let touchEndX = 0;
-            
-            document.addEventListener('touchstart', function(e) {
-                touchStartX = e.changedTouches[0].screenX;
-            });
-            
-            document.addEventListener('touchend', function(e) {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            });
-            
-            function handleSwipe() {
-                const swipeThreshold = 50;
-                const diff = touchStartX - touchEndX;
-                
-                if (Math.abs(diff) > swipeThreshold) {
-                    if (diff > 0) {
-                        // Swipe left - next scene
-                        nextScene();
-                    } else {
-                        // Swipe right - previous scene
-                        previousScene();
-                    }
-                }
-            }
         });
     </script>
 </body>
